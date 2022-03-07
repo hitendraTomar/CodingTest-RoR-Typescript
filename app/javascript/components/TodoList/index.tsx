@@ -25,14 +25,13 @@ const TodoList: React.FC<Props> = ({ todoItems }) => {
     e: React.ChangeEvent<HTMLInputElement>,
     todoItemId: number
   ): void => {
-    axios.post("/todo", {
-      id: todoItemId,
+    axios.put(`/todos/${todoItemId}.json`, {
       checked: e.target.checked,
-    });
+    }).then(() => location.reload());
   };
 
   const resetButtonOnClick = (): void => {
-    axios.post("/reset").then(() => location.reload());
+    axios.post("/todos/reset.json").then(() => location.reload());
   };
 
   return (
