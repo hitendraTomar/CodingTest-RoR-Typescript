@@ -1,19 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, ListGroup, Form } from "react-bootstrap";
+import { TodoListItem } from './TodoListItem';
 import { ResetButton } from "./uiComponent";
 import axios from "axios";
 
-type TodoItem = {
-  id: number;
-  title: string;
-  checked: boolean;
-};
-
-type Props = {
-  todoItems: TodoItem[];
-};
-
 const TodoList: React.FC<Props> = ({ todoItems }) => {
+  const [todos, setTodos] =  useState(todoItems);
+
   useEffect(() => {
     const token = document.querySelector(
       "[name=csrf-token]"
@@ -21,13 +14,24 @@ const TodoList: React.FC<Props> = ({ todoItems }) => {
     axios.defaults.headers.common["X-CSRF-TOKEN"] = token.content;
   }, []);
 
-  const checkBoxOnCheck = (
+  const toggleTodo = (
     e: React.ChangeEvent<HTMLInputElement>,
-    todoItemId: number
+    selectedTodo: TodoItem
   ): void => {
-    axios.put(`/todos/${todoItemId}.json`, {
+    const newTodos = todos.map((todo) => {
+      if (todo.id === selectedTodo.id) {
+        return {
+          ...todo,
+          checked: !todo.checked,
+        };
+      }
+      return todo;
+    });
+    setTodos(newTodos);
+
+    axios.put(`/todos/${selectedTodo.id}.json`, {
       checked: e.target.checked,
-    }).then(() => location.reload());
+    })
   };
 
   const resetButtonOnClick = (): void => {
@@ -38,15 +42,10 @@ const TodoList: React.FC<Props> = ({ todoItems }) => {
     <Container>
       <h3>2022 Wish List</h3>
       <ListGroup>
-        {todoItems.map((todo) => (
-          <ListGroup.Item key={todo.id}>
-            <Form.Check
-              type="checkbox"
-              label={todo.title}
-              checked={todo.checked}
-              onChange={(e) => checkBoxOnCheck(e, todo.id)}
-            />
-          </ListGroup.Item>
+        {todos.map((todo) => (
+          <div key={todo.id}>
+            <TodoListItem todo={todo} toggleTodo={toggleTodo} />
+          </div>
         ))}
         <ResetButton onClick={resetButtonOnClick}>Reset</ResetButton>
       </ListGroup>

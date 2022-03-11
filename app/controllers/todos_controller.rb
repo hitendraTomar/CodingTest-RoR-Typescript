@@ -16,7 +16,7 @@ class TodosController < ApplicationController
   end
 
   def reset
-    if Todo.update_all(checked: false)
+    if Todo.reset_all!
       render_success_response(
         {
           todo: Todo.all
@@ -30,10 +30,10 @@ class TodosController < ApplicationController
   private
 
   def todo_params
-    params.permit(:id, :checked)
+    params.require(:todo).permit(:checked)
   end
 
   def set_todo
-    @todo = Todo.find_by_id(todo_params[:id])
+    @todo = Todo.find_by_id(params[:id])
   end
 end
